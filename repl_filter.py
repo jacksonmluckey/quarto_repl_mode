@@ -9,6 +9,24 @@ import panflute as pf
 from pygments import highlight
 from pygments.formatters import HtmlFormatter
 from pygments.lexers import PythonConsoleLexer
+from pygments.style import Style
+from pygments.styles import get_style_by_name
+from pygments.token import Generic
+
+
+def _make_repl_style(base_name):
+    """Create a Pygments style based on base_name but with Generic.Output using the default text color."""
+    base = get_style_by_name(base_name)
+    default_color = base.style_for_token(Generic)["color"] or base.style_for_token(Generic.Output).get("color", "")
+    # Fall back to the base style's top-level text color
+    if not default_color:
+        default_color = base.style_for_token(Generic)["color"] or "f8f8f2"
+
+    class REPLStyle(base):
+        styles = dict(base.styles)
+        styles[Generic.Output] = f"#{default_color}"
+
+    return REPLStyle
 
 
 class REPLSession:
@@ -151,7 +169,8 @@ def handle_cell(elem, doc):
         hl = doc.get_metadata("repl-highlight-style", None)
         if hl and isinstance(hl, str):
             pygments_style = hl
-    formatter = HtmlFormatter(nowrap=True, noclasses=True, style=pygments_style)
+    repl_style = _make_repl_style(pygments_style)
+    formatter = HtmlFormatter(nowrap=True, noclasses=True, style=repl_style)
     highlighted = highlight(result, PythonConsoleLexer(), formatter)
     html = f'<div class="sourceCode"><pre class="sourceCode pycon"><code class="sourceCode pycon">{highlighted}</code></pre></div>'
     return pf.RawBlock(html, format="html")

@@ -1,6 +1,8 @@
 project:
   type: default
 
+repl-highlight-style: monokai
+
 filters:
   - repl_filter.py
 
