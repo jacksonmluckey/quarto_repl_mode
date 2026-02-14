@@ -32,3 +32,18 @@ for ii in range(5):
 my_list[0:2]
 my_list
 ```
+
+TODO remove this after refactoring out need for `#| eval: false`
+```{python}
+my_list = ['a', 'b', 'c']
+```
+
+```{python}
+for item in my_list:
+    item
+```
+
+```{python}
+for item in my_list:
+    print(item)
+```
