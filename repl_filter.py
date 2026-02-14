@@ -114,32 +114,39 @@ class REPLSession:
 session = REPLSession()
 
 
-def handle_code_block(elem, doc):
-    if not isinstance(elem, pf.CodeBlock):
+def handle_cell(elem, doc):
+    if not isinstance(elem, pf.Div):
         return None
 
-    # Detect repl-mode: Quarto puts #| directives on the parent Div's attributes
-    is_repl = False
-    if elem.parent and hasattr(elem.parent, 'attributes'):
-        is_repl = elem.parent.attributes.get("repl-mode") == "true"
-
-    if not is_repl:
+    if "cell" not in elem.classes:
         return None
 
-    # Strip the #| repl-mode directive from the source if present
-    source_lines = elem.text.split("\n")
-    filtered = [
-        line for line in source_lines
-        if not line.strip().startswith("#| repl-mode") and not line.strip().startswith("#| REPL-mode")
-    ]
-    source = "\n".join(filtered)
+    if elem.attributes.get("repl-mode") != "true":
+        return None
+
+    # Find the source CodeBlock inside this cell Div
+    source = None
+    for child in elem.content:
+        if isinstance(child, pf.Div) and "cell-code" in child.classes:
+            for subchild in child.content:
+                if isinstance(subchild, pf.CodeBlock):
+                    source = subchild.text
+                    break
+        elif isinstance(child, pf.CodeBlock) and "cell-code" in child.classes:
+            source = child.text
+        if source is not None:
+            break
+
+    if source is None:
+        return None
 
     result = session.execute(source)
+    # Replace the entire cell Div with a single REPL-formatted code block
     return pf.CodeBlock(result, classes=["pycon"])
 
 
 def main(doc=None):
-    return pf.run_filter(handle_code_block, doc=doc)
+    return pf.run_filter(handle_cell, doc=doc)
 
 
 if __name__ == "__main__":
