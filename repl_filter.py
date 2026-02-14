@@ -6,6 +6,9 @@ import io
 import sys
 
 import panflute as pf
+from pygments import highlight
+from pygments.formatters import HtmlFormatter
+from pygments.lexers import PythonConsoleLexer
 
 
 class REPLSession:
@@ -141,8 +144,17 @@ def handle_cell(elem, doc):
         return None
 
     result = session.execute(source)
-    # Replace the entire cell Div with a single REPL-formatted code block
-    return pf.CodeBlock(result, classes=["pycon"])
+    # Use Pygments to syntax-highlight the REPL output with inline styles.
+    # Set via `repl-highlight-style: monokai` in document or _quarto.yml metadata.
+    pygments_style = "default"
+    if doc:
+        hl = doc.get_metadata("repl-highlight-style", None)
+        if hl and isinstance(hl, str):
+            pygments_style = hl
+    formatter = HtmlFormatter(nowrap=True, noclasses=True, style=pygments_style)
+    highlighted = highlight(result, PythonConsoleLexer(), formatter)
+    html = f'<div class="sourceCode"><pre class="sourceCode pycon"><code class="sourceCode pycon">{highlighted}</code></pre></div>'
+    return pf.RawBlock(html, format="html")
 
 
 def main(doc=None):
