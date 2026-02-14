@@ -1,0 +1,12 @@
+project:
+  type: default
+
+filters:
+  - repl_filter.py
+
+format:
+  html:
+    theme:
+      - journal
+    html-math-method: katex
+    highlight-style: monokai
