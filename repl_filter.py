@@ -14,6 +14,12 @@ from pygments.styles import get_style_by_name
 from pygments.token import Generic
 
 REPR_SENTINEL = "\x00REPR\x00"
+CONTINUATION_KEYWORDS = frozenset({"else", "elif", "except", "finally", "case"})
+
+
+def _has_unterminated_triple_quote(source):
+    """Check if source has an odd number of triple-quote delimiters."""
+    return (source.count('"""') % 2 == 1) or (source.count("'''") % 2 == 1)
 
 
 def _make_repl_style(base_name):
@@ -104,25 +110,47 @@ class REPLSession:
         for rv in repr_values:
             output_parts.append(REPR_SENTINEL + rv)
 
+    @staticmethod
+    def _next_line_is_continuation(lines, i):
+        """Check if the line after index i starts with a continuation keyword."""
+        if i + 1 >= len(lines):
+            return False
+        next_stripped = lines[i + 1].lstrip()
+        if not next_stripped:
+            return False
+        next_keyword = next_stripped.split()[0].rstrip(":")
+        return next_keyword in CONTINUATION_KEYWORDS
+
+    @staticmethod
+    def _is_continuation_keyword(line):
+        """Check if a line starts with a continuation keyword."""
+        stripped = line.lstrip()
+        if not stripped:
+            return False
+        keyword = stripped.split()[0].rstrip(":")
+        return keyword in CONTINUATION_KEYWORDS
+
     def execute(self, source: str) -> str:
         """Execute source code line-by-line and return REPL-formatted output."""
         lines = source.strip().split("\n")
         output_parts = []
         buffer = []
 
-        for line in lines:
+        for i, line in enumerate(lines):
             # If buffer has an incomplete block and the new line is unindented
-            # (starts a new statement), flush the buffer first
+            # (starts a new statement), flush the buffer first.
+            # Skip this check for continuation keywords (else, elif, except, etc.)
             if buffer and not line.startswith((" ", "\t")) and line.strip():
-                full = "\n".join(buffer)
-                try:
-                    compiled = code.compile_command(full, symbol="single")
-                except SyntaxError:
-                    compiled = "error"
-                if compiled is None:
-                    # Buffer is incomplete — flush it before starting the new line
-                    self._flush_buffer(buffer, output_parts)
-                    buffer = []
+                if not self._is_continuation_keyword(line):
+                    full = "\n".join(buffer)
+                    try:
+                        compiled = code.compile_command(full, symbol="single")
+                    except SyntaxError:
+                        compiled = "error"
+                    if compiled is None and not _has_unterminated_triple_quote(full):
+                        # Buffer is incomplete — flush it before starting the new line
+                        self._flush_buffer(buffer, output_parts)
+                        buffer = []
 
             buffer.append(line)
             full = "\n".join(buffer)
@@ -130,6 +158,9 @@ class REPLSession:
             try:
                 compiled = code.compile_command(full, symbol="single")
             except SyntaxError:
+                # Check if this might be an unterminated triple-quoted string
+                if _has_unterminated_triple_quote(full):
+                    continue
                 # Syntax error — flush buffer with error
                 self._flush_buffer(buffer, output_parts)
                 buffer = []
@@ -139,7 +170,10 @@ class REPLSession:
                 # Incomplete statement — accumulate more lines
                 continue
 
-            # Complete statement — execute
+            # Complete statement — but don't flush if next line is a continuation
+            if self._next_line_is_continuation(lines, i):
+                continue
+
             self._flush_buffer(buffer, output_parts)
             buffer = []
 

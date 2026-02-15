@@ -3,8 +3,6 @@ title: "REPL Mode Example"
 format: html
 ---
 
-## REPL Mode Demo
-
 The following chunk uses `#| repl-mode: true` to render as an interactive Python session:
 
 ```{python}
@@ -17,6 +15,16 @@ my_var
 my_var + 1
 ```
 
+The output is line-by-line and syntax highlighted.
+
+Chunks without `#| repl-mode: true` are rendered as normal:
+
+```{python}
+my_var = 10
+my_var * 10
+my_var / 10
+my_var + 10
+```
 
 ```{python}
 #| repl-mode: true
@@ -35,4 +43,31 @@ This non-REPL chunk can access `my_list` from the REPL chunk above:
 
 ```{python}
 print(f"my_list has {len(my_list)} items: {my_list}")
+```
+
+Multi-line statements work in REPL mode:
+
+```{python}
+#| repl-mode: true
+for item in my_list:
+    if item == 'a':
+        item
+    elif item == 'b':
+        'b is B'
+    else:
+        'should be C'
+```
+
+
+```{python}
+#| repl-mode: true
+def my_func(x):
+    '''
+    I am a multiline docstring
+    I should render correctly in REPL mode
+    '''
+    return x
+
+my_func(10)
+my_func('Hello!')
 ```
