@@ -1,5 +1,11 @@
 """Tests for repl_filter.py"""
 
+import sys
+from pathlib import Path
+
+# Add the extension directory to sys.path so we can import the filter
+sys.path.insert(0, str(Path(__file__).parent / "_extensions" / "repl-mode"))
+
 from pygments.token import Generic
 
 from repl_filter import REPR_SENTINEL, REPLSession, _make_repl_style

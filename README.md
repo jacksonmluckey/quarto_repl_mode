@@ -27,13 +27,27 @@ Renders as:
 
 Chunks without `#| repl-mode: true` render normally. State is shared across all chunks in a document.
 
+## Installation
+
+Install the Quarto extension:
+
+```bash
+quarto add jacksonmluckey/quarto-repl-mode
+```
+
+Install Python dependencies:
+
+```bash
+pip install panflute pygments
+```
+
 ## Setup
 
-Register the filter in `_quarto.yml`:
+Add the filter in your `_quarto.yml`:
 
 ```yaml
 filters:
-  - repl_filter.py
+  - repl-mode
 ```
 
 Optionally set the Pygments highlight style for REPL output (defaults to `default`):
@@ -43,12 +57,6 @@ repl-highlight-style: monokai
 ```
 
 It will not automatically sync with the Quarto syntax highlighting theme.
-
-Install dependencies:
-
-```bash
-uv sync
-```
 
 ## Features
 

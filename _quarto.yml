@@ -4,7 +4,7 @@ project:
 repl-highlight-style: monokai
 
 filters:
-  - repl_filter.py
+  - repl-mode
 
 format:
   html:
