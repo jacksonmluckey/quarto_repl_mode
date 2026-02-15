@@ -3,6 +3,8 @@
 import code
 import io
 import sys
+import token
+import tokenize
 
 import panflute as pf
 from pygments import highlight
@@ -18,6 +20,36 @@ CONTINUATION_KEYWORDS = frozenset({"else", "elif", "except", "finally", "case"})
 def _has_unterminated_triple_quote(source):
     """Check if source has an odd number of triple-quote delimiters."""
     return (source.count('"""') % 2 == 1) or (source.count("'''") % 2 == 1)
+
+
+def _has_unclosed_delimiters(source):
+    """Check if source has unclosed parentheses, brackets, or braces.
+
+    Uses tokenize module to correctly handle strings, comments, etc.
+    Returns True if there are unclosed delimiters, False otherwise.
+    """
+    depth = {"(": 0, "[": 0, "{": 0}
+    close_to_open = {")": "(", "]": "[", "}": "{"}
+
+    try:
+        tokens = tokenize.generate_tokens(io.StringIO(source).readline)
+        for tok in tokens:
+            if tok.type == token.OP:
+                if tok.string in depth:
+                    depth[tok.string] += 1
+                elif tok.string in close_to_open:
+                    opening = close_to_open[tok.string]
+                    depth[opening] -= 1
+                    if depth[opening] < 0:
+                        return False  # Mismatched - let compile_command handle
+    except tokenize.TokenError:
+        # Tokenization failed (likely due to incomplete code)
+        # but we may have tracked some delimiters - check them
+        pass
+    except Exception:
+        return False  # Other errors - let compile_command handle
+
+    return any(d > 0 for d in depth.values())
 
 
 def _make_repl_style(base_name):
@@ -147,7 +179,7 @@ class REPLSession:
                         compiled = code.compile_command(full, symbol="single")
                     except SyntaxError:
                         compiled = "error"
-                    if compiled is None and not _has_unterminated_triple_quote(full):
+                    if compiled is None and not _has_unterminated_triple_quote(full) and not _has_unclosed_delimiters(full):
                         # Buffer is incomplete — flush it before starting the new line
                         self._flush_buffer(buffer, output_parts)
                         buffer = []

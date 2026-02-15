@@ -72,3 +72,15 @@ def my_func(x):
 my_func(10)
 my_func('Hello!')
 ```
+
+This includes ones inside parenthesis:
+
+```{python}
+#| repl-mode: true
+print(
+    [
+        1 + x**2
+        for x in range(5)
+    ]
+)
+```

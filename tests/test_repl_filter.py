@@ -4,7 +4,7 @@ import sys
 from pathlib import Path
 
 # Add the extension directory to sys.path so we can import the filter
-sys.path.insert(0, str(Path(__file__).parent / "_extensions" / "repl-mode"))
+sys.path.insert(0, str(Path(__file__).parent.parent / "_extensions" / "repl-mode"))
 
 from pygments.token import Generic
 
@@ -254,3 +254,55 @@ class TestHighlighting:
         custom_prompt = custom.style_for_token(Generic.Prompt)
         assert base_prompt["color"] == custom_prompt["color"]
         assert base_prompt["bold"] == custom_prompt["bold"]
+
+
+class TestParenthesesStatements:
+    def setup_method(self):
+        self.session = REPLSession()
+
+    def test_multiline_parenthesized_expression(self):
+        """Parenthesized multi-line expressions should work."""
+        code = "result = (\n    1 + 2\n)\nresult"
+        result = self.session.execute(code)
+        lines = result.split("\n")
+        assert lines[0] == ">>> result = ("
+        assert lines[1] == "...     1 + 2"
+        assert lines[2] == "... )"
+        assert not any("Error" in line for line in lines)
+        assert f"{S}3" in result
+
+    def test_multiline_list_literal(self):
+        """Multi-line list literals with bracket on separate line should work."""
+        code = "my_list = [\n    1,\n    2,\n    3\n]\nmy_list"
+        result = self.session.execute(code)
+        assert "SyntaxError" not in result
+        assert f"{S}[1, 2, 3]" in result
+
+    def test_multiline_dict_literal(self):
+        """Multi-line dict literals should work."""
+        code = "my_dict = {\n    'a': 1,\n    'b': 2\n}\nmy_dict"
+        result = self.session.execute(code)
+        assert "SyntaxError" not in result
+        assert S in result
+
+    def test_function_call_multiline_args(self):
+        """Function calls with multi-line arguments should work."""
+        code = "print(\n    'hello',\n    'world'\n)"
+        result = self.session.execute(code)
+        assert "hello" in result
+        assert "world" in result
+        assert "SyntaxError" not in result
+
+    def test_nested_delimiters(self):
+        """Nested parentheses/brackets/braces should work."""
+        code = "result = [(1, 2), (3, 4)]\nresult"
+        result = self.session.execute(code)
+        assert "SyntaxError" not in result
+        assert f"{S}[(1, 2), (3, 4)]" in result
+
+    def test_delimiter_in_string_ignored(self):
+        """Delimiters inside strings should not affect parsing."""
+        code = 'text = "this has ( and ) in it"\nif True:\n    text'
+        result = self.session.execute(code)
+        assert "SyntaxError" not in result
+        assert S in result
