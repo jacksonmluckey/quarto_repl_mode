@@ -8,7 +8,6 @@ import panflute as pf
 from pygments import highlight
 from pygments.formatters import HtmlFormatter
 from pygments.lexers import Python3Lexer, PythonConsoleLexer
-from pygments.style import Style
 from pygments.styles import get_style_by_name
 from pygments.token import Generic
 

@@ -59,7 +59,7 @@ class TestPrintVsRepr:
         result = self.session.execute(code)
         lines = result.split("\n")
         # Find the output lines (after the f() call prompt)
-        call_idx = next(i for i, l in enumerate(lines) if l == ">>> f()")
+        call_idx = next(i for i, line in enumerate(lines) if line == ">>> f()")
         output_lines = lines[call_idx + 1 :]
         assert "side effect" in output_lines
         assert f"{S}42" in output_lines
@@ -91,7 +91,7 @@ class TestMultiLineBlocks:
         assert lines[0] == ">>> for i in range(3):"
         assert lines[1] == "...     i"
         # Expression results inside loops go through displayhook
-        repr_lines = [l for l in lines if l.startswith(S)]
+        repr_lines = [line for line in lines if line.startswith(S)]
         assert len(repr_lines) == 3
         assert f"{S}0" in lines
         assert f"{S}1" in lines
@@ -107,19 +107,19 @@ class TestMultiLineBlocks:
             "x = 5\nif x > 3:\n    print('big')\nelse:\n    print('small')"
         )
         lines = result.split("\n")
-        output_lines = [l for l in lines if not l.startswith((">>>", "..."))]
+        output_lines = [line for line in lines if not line.startswith((">>>", "..."))]
         assert "big" in output_lines
         assert "small" not in output_lines
-        assert not any("Error" in l for l in output_lines)
+        assert not any("Error" in line for line in output_lines)
 
     def test_if_elif_else(self):
         result = self.session.execute(
             "x = 2\nif x > 3:\n    print('a')\nelif x > 1:\n    print('b')\nelse:\n    print('c')"
         )
         lines = result.split("\n")
-        output_lines = [l for l in lines if not l.startswith((">>>", "..."))]
+        output_lines = [line for line in lines if not line.startswith((">>>", "..."))]
         assert "b" in output_lines
-        assert not any("Error" in l for l in output_lines)
+        assert not any("Error" in line for line in output_lines)
 
     def test_try_except(self):
         result = self.session.execute(
@@ -154,13 +154,13 @@ class TestMultiLineBlocks:
             "try:\n    1/0\nexcept ValueError:\n    print('val')\nexcept ZeroDivisionError:\n    print('zero')"
         )
         lines = result.split("\n")
-        output_lines = [l for l in lines if not l.startswith((">>>", "..."))]
+        output_lines = [line for line in lines if not line.startswith((">>>", "..."))]
         assert "zero" in output_lines
         assert "val" not in output_lines
 
     def test_multiline_string(self):
         result = self.session.execute('x = """hello\nworld"""\nx')
-        repr_lines = [l for l in result.split("\n") if l.startswith(S)]
+        repr_lines = [line for line in result.split("\n") if line.startswith(S)]
         assert len(repr_lines) == 1
         assert "hello" in repr_lines[0]
         assert "world" in repr_lines[0]
@@ -186,7 +186,7 @@ class TestStatePersistence:
         result = self.session.execute("math.pi")
         assert S in result
         # Extract the repr value
-        repr_line = [l for l in result.split("\n") if l.startswith(S)][0]
+        repr_line = [line for line in result.split("\n") if line.startswith(S)][0]
         value = float(repr_line[len(S) :])
         assert abs(value - 3.141592653589793) < 1e-10
 
@@ -227,7 +227,7 @@ class TestHighlighting:
         session = REPLSession()
         result = session.execute("if True:\n    x = 1\nelse:\n    x = 2")
         # Highlight as a block (the way handle_cell does it)
-        console_lines = [l for l in result.split("\n") if not l.startswith(S)]
+        console_lines = [line for line in result.split("\n") if not line.startswith(S)]
         block = "\n".join(console_lines)
         formatter = HtmlFormatter(nowrap=True, noclasses=True, style="monokai")
         html = highlight(block, PythonConsoleLexer(), formatter)

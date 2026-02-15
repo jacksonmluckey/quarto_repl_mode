@@ -13,3 +13,5 @@ example_files/
 example.html
 
 **.pyc
+
+.ruff_cache/
