@@ -54,7 +54,7 @@ class TestPrintVsRepr:
         lines = result.split("\n")
         # Find the output lines (after the f() call prompt)
         call_idx = next(i for i, l in enumerate(lines) if l == ">>> f()")
-        output_lines = lines[call_idx + 1:]
+        output_lines = lines[call_idx + 1 :]
         assert "side effect" in output_lines
         assert f"{S}42" in output_lines
         # print output comes before repr
@@ -97,7 +97,9 @@ class TestMultiLineBlocks:
         assert S not in result  # print output, no repr
 
     def test_if_else(self):
-        result = self.session.execute("x = 5\nif x > 3:\n    print('big')\nelse:\n    print('small')")
+        result = self.session.execute(
+            "x = 5\nif x > 3:\n    print('big')\nelse:\n    print('small')"
+        )
         lines = result.split("\n")
         output_lines = [l for l in lines if not l.startswith((">>>", "..."))]
         assert "big" in output_lines
@@ -105,34 +107,46 @@ class TestMultiLineBlocks:
         assert not any("Error" in l for l in output_lines)
 
     def test_if_elif_else(self):
-        result = self.session.execute("x = 2\nif x > 3:\n    print('a')\nelif x > 1:\n    print('b')\nelse:\n    print('c')")
+        result = self.session.execute(
+            "x = 2\nif x > 3:\n    print('a')\nelif x > 1:\n    print('b')\nelse:\n    print('c')"
+        )
         lines = result.split("\n")
         output_lines = [l for l in lines if not l.startswith((">>>", "..."))]
         assert "b" in output_lines
         assert not any("Error" in l for l in output_lines)
 
     def test_try_except(self):
-        result = self.session.execute("try:\n    1/0\nexcept ZeroDivisionError:\n    print('caught')")
+        result = self.session.execute(
+            "try:\n    1/0\nexcept ZeroDivisionError:\n    print('caught')"
+        )
         assert "caught" in result
         assert "SyntaxError" not in result
 
     def test_try_except_finally(self):
-        result = self.session.execute("try:\n    x = 1\nexcept:\n    pass\nfinally:\n    print('done')")
+        result = self.session.execute(
+            "try:\n    x = 1\nexcept:\n    pass\nfinally:\n    print('done')"
+        )
         assert "done" in result
         assert "SyntaxError" not in result
 
     def test_for_else(self):
-        result = self.session.execute("for i in []:\n    pass\nelse:\n    print('empty')")
+        result = self.session.execute(
+            "for i in []:\n    pass\nelse:\n    print('empty')"
+        )
         assert "empty" in result
         assert "Error" not in result
 
     def test_while_else(self):
-        result = self.session.execute("x = 0\nwhile x < 0:\n    x += 1\nelse:\n    print('done')")
+        result = self.session.execute(
+            "x = 0\nwhile x < 0:\n    x += 1\nelse:\n    print('done')"
+        )
         assert "done" in result
         assert "Error" not in result
 
     def test_multiple_except(self):
-        result = self.session.execute("try:\n    1/0\nexcept ValueError:\n    print('val')\nexcept ZeroDivisionError:\n    print('zero')")
+        result = self.session.execute(
+            "try:\n    1/0\nexcept ValueError:\n    print('val')\nexcept ZeroDivisionError:\n    print('zero')"
+        )
         lines = result.split("\n")
         output_lines = [l for l in lines if not l.startswith((">>>", "..."))]
         assert "zero" in output_lines
@@ -146,7 +160,9 @@ class TestMultiLineBlocks:
         assert "world" in repr_lines[0]
 
     def test_function_def_and_call(self):
-        result = self.session.execute("def greet(name):\n    return f'hi {name}'\ngreet('world')")
+        result = self.session.execute(
+            "def greet(name):\n    return f'hi {name}'\ngreet('world')"
+        )
         assert f"{S}'hi world'" in result
 
 
@@ -165,7 +181,7 @@ class TestStatePersistence:
         assert S in result
         # Extract the repr value
         repr_line = [l for l in result.split("\n") if l.startswith(S)][0]
-        value = float(repr_line[len(S):])
+        value = float(repr_line[len(S) :])
         assert abs(value - 3.141592653589793) < 1e-10
 
 
@@ -213,10 +229,14 @@ class TestHighlighting:
         # not be a single default-color span
         for line in html.split("\n"):
             if "..." in line and "else" in line:
-                assert line.count("<span") > 1, f"Continuation line lacks highlighting: {line}"
+                assert line.count("<span") > 1, (
+                    f"Continuation line lacks highlighting: {line}"
+                )
                 break
         else:
-            raise AssertionError("Could not find '... else' continuation line in output")
+            raise AssertionError(
+                "Could not find '... else' continuation line in output"
+            )
 
     def test_make_repl_style_preserves_other_tokens(self):
         from pygments.styles import get_style_by_name

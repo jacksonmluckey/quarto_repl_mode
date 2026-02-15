@@ -24,7 +24,9 @@ def _has_unterminated_triple_quote(source):
 def _make_repl_style(base_name):
     """Create a Pygments style based on base_name but with Generic.Output using the default text color."""
     base = get_style_by_name(base_name)
-    default_color = base.style_for_token(Generic)["color"] or base.style_for_token(Generic.Output).get("color", "")
+    default_color = base.style_for_token(Generic)["color"] or base.style_for_token(
+        Generic.Output
+    ).get("color", "")
     # Fall back to the base style's top-level text color
     if not default_color:
         default_color = base.style_for_token(Generic)["color"] or "f8f8f2"
@@ -236,14 +238,18 @@ def handle_cell(elem, doc):
     def flush_console():
         if console_buf:
             block = "\n".join(console_buf)
-            highlighted_parts.append(highlight(block, console_lexer, formatter).rstrip("\n"))
+            highlighted_parts.append(
+                highlight(block, console_lexer, formatter).rstrip("\n")
+            )
             console_buf.clear()
 
     for line in lines:
         if line.startswith(REPR_SENTINEL):
             flush_console()
-            repr_text = line[len(REPR_SENTINEL):]
-            highlighted_parts.append(highlight(repr_text, py_lexer, py_formatter).rstrip("\n"))
+            repr_text = line[len(REPR_SENTINEL) :]
+            highlighted_parts.append(
+                highlight(repr_text, py_lexer, py_formatter).rstrip("\n")
+            )
         else:
             console_buf.append(line)
 
