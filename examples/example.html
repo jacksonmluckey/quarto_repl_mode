@@ -2237,12 +2237,12 @@ vertical-align: -.125em;
 <span style="color: #AE81FF">70</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <p>The output is line-by-line and syntax highlighted.</p>
 <p>Chunks without <code>#| repl-mode: true</code> are rendered as normal:</p>
-<div id="77b2ae48" class="cell" data-execution_count="2">
+<div id="c7f6b431" class="cell" data-execution_count="2">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>my_var <span class="op">=</span> <span class="dv">10</span></span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>my_var <span class="op">*</span> <span class="dv">10</span></span>
 <span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>my_var <span class="op">/</span> <span class="dv">10</span></span>
 <span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>my_var <span class="op">+</span> <span class="dv">10</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<div class="cell-output cell-output-display" data-execution_count="14">
+<div class="cell-output cell-output-display" data-execution_count="2">
 <pre><code>20</code></pre>
 </div>
 </div>
@@ -2269,7 +2269,7 @@ vertical-align: -.125em;
 <span style="color: #FF4689; font-weight: bold">&gt;&gt;&gt; </span><span style="color: #F8F8F2">my_list</span>
 <span style="color: #F8F8F2">[</span><span style="color: #E6DB74">&#39;a&#39;</span><span style="color: #F8F8F2">,</span> <span style="color: #E6DB74">&#39;b&#39;</span><span style="color: #F8F8F2">,</span> <span style="color: #E6DB74">&#39;c&#39;</span><span style="color: #F8F8F2">]</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <p>This non-REPL chunk can access <code>my_list</code> from the REPL chunk above:</p>
-<div id="f6725e35" class="cell" data-execution_count="4">
+<div id="0caee3ed" class="cell" data-execution_count="4">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f&quot;my_list has </span><span class="sc">{</span><span class="bu">len</span>(my_list)<span class="sc">}</span><span class="ss"> items: </span><span class="sc">{</span>my_list<span class="sc">}</span><span class="ss">&quot;</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>my_list has 3 items: [&#39;a&#39;, &#39;b&#39;, &#39;c&#39;]</code></pre>
@@ -2297,6 +2297,14 @@ vertical-align: -.125em;
 <span style="color: #AE81FF">10</span>
 <span style="color: #FF4689; font-weight: bold">&gt;&gt;&gt; </span><span style="color: #F8F8F2">my_func(</span><span style="color: #E6DB74">&#39;Hello!&#39;</span><span style="color: #F8F8F2">)</span>
 <span style="color: #E6DB74">&#39;Hello!&#39;</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>This includes ones inside parenthesis:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode"><pre class="sourceCode pycon code-with-copy"><code class="sourceCode pycon"><span style="color: #FF4689; font-weight: bold">&gt;&gt;&gt; </span><span style="color: #F8F8F2">print(</span>
+<span style="color: #FF4689; font-weight: bold">... </span>    <span style="color: #F8F8F2">[</span>
+<span style="color: #FF4689; font-weight: bold">... </span>        <span style="color: #AE81FF">1</span> <span style="color: #FF4689">+</span> <span style="color: #F8F8F2">x</span><span style="color: #FF4689">**</span><span style="color: #AE81FF">2</span>
+<span style="color: #FF4689; font-weight: bold">... </span>        <span style="color: #66D9EF">for</span> <span style="color: #F8F8F2">x</span> <span style="color: #FF4689">in</span> <span style="color: #F8F8F2">range(</span><span style="color: #AE81FF">5</span><span style="color: #F8F8F2">)</span>
+<span style="color: #FF4689; font-weight: bold">... </span>    <span style="color: #F8F8F2">]</span>
+<span style="color: #FF4689; font-weight: bold">... </span><span style="color: #F8F8F2">)</span>
+<span style="color: #F8F8F2">[1, 2, 5, 10, 17]</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 
 </main>
 <!-- /main column -->
