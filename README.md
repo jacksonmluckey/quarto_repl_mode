@@ -1,6 +1,20 @@
 # quarto-repl-mode
 
-A Quarto filter that renders Python code chunks as interactive REPL sessions with `>>>` prompts, inline output, and syntax highlighting.
+A Quarto filter that renders Python code chunks as an interactive REPL session.
+
+New lines begin with `>>>` prompts and `...` multi-line continuations.
+
+Expression results are rendered as inline output immeditately following the line they come from. The inline output is syntax highlighted. `print()` output is plain text.
+
+Compound statements work like `if/elif/else`, `try/except/finally`, `for/else`, and multiline strings are supported.
+
+State (variables, imports, function definitions) is shared across all chunks in a document like normal Quarto documents.
+
+Chunks without `#| repl-mode: true` render normally.
+
+Errors display inline without breaking the session?
+
+The extension code is in [`_extensions/repl-mode/repl_filter.py`](_extensions/repl-mode/repl_filter.py).
 
 ## Usage
 
@@ -25,8 +39,6 @@ Renders as:
 84
 ```
 
-Chunks without `#| repl-mode: true` render normally. State is shared across all chunks in a document.
-
 ## Installation
 
 Install the Quarto extension:
@@ -38,7 +50,7 @@ quarto add jacksonmluckey/quarto-repl-mode
 Install Python dependencies:
 
 ```bash
-pip install panflute pygments
+uv add install panflute pygments
 ```
 
 ## Setup
@@ -58,15 +70,10 @@ repl-highlight-style: monokai
 
 It will not automatically sync with the Quarto syntax highlighting theme.
 
-## Features
-
-- Expression results (`repr`) are syntax-highlighted; `print()` output is plain text
-- Compound statements work: `if/elif/else`, `try/except/finally`, `for/else`, multiline strings
-- State persists across chunks (variables, imports, function definitions)
-- Errors display inline without breaking the session
-
 ## Tests
 
+The tests are in [`tests/test_repl_filter.py`](tests/test_repl_filter.py).
+
 ```bash
-uv run pytest test_repl_filter.py -v
+uv run pytest tests/test_repl_filter.py -v
 ```
