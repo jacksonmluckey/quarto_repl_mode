@@ -46,7 +46,7 @@ Renders as:
 Install the Quarto extension:
 
 ```bash
-quarto add jacksonmluckey/quarto-repl-mode
+quarto add jacksonmluckey/quarto_repl_mode
 ```
 
 Install Python dependencies:
