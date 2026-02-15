@@ -8,10 +8,12 @@ import sys
 import panflute as pf
 from pygments import highlight
 from pygments.formatters import HtmlFormatter
-from pygments.lexers import PythonConsoleLexer
+from pygments.lexers import Python3Lexer, PythonConsoleLexer
 from pygments.style import Style
 from pygments.styles import get_style_by_name
 from pygments.token import Generic
+
+REPR_SENTINEL = "\x00REPR\x00"
 
 
 def _make_repl_style(base_name):
@@ -71,20 +73,36 @@ class REPLSession:
 
         old_stdout = sys.stdout
         old_stderr = sys.stderr
+        old_displayhook = sys.displayhook
         sys.stdout = captured_out = io.StringIO()
         sys.stderr = captured_err = io.StringIO()
 
+        repr_values = []
+
+        def _capture_displayhook(value):
+            if value is not None:
+                repr_values.append(repr(value))
+                builtins = self.console.locals.setdefault("__builtins__", {})
+                if isinstance(builtins, dict):
+                    builtins["_"] = value
+                else:
+                    setattr(builtins, "_", value)
+
+        sys.displayhook = _capture_displayhook
         self.console.runcode(compiled)
 
         stdout_val = captured_out.getvalue()
         stderr_val = captured_err.getvalue()
         sys.stdout = old_stdout
         sys.stderr = old_stderr
+        sys.displayhook = old_displayhook
 
         if stdout_val:
             output_parts.append(stdout_val.rstrip())
         if stderr_val:
             output_parts.append(stderr_val.rstrip())
+        for rv in repr_values:
+            output_parts.append(REPR_SENTINEL + rv)
 
     def execute(self, source: str) -> str:
         """Execute source code line-by-line and return REPL-formatted output."""
@@ -171,7 +189,19 @@ def handle_cell(elem, doc):
             pygments_style = hl
     repl_style = _make_repl_style(pygments_style)
     formatter = HtmlFormatter(nowrap=True, noclasses=True, style=repl_style)
-    highlighted = highlight(result, PythonConsoleLexer(), formatter)
+    py_formatter = HtmlFormatter(nowrap=True, noclasses=True, style=pygments_style)
+    py_lexer = Python3Lexer()
+
+    # Highlight each line: repr output gets Python syntax highlighting,
+    # everything else goes through PythonConsoleLexer.
+    highlighted_lines = []
+    for line in result.split("\n"):
+        if line.startswith(REPR_SENTINEL):
+            repr_text = line[len(REPR_SENTINEL):]
+            highlighted_lines.append(highlight(repr_text, py_lexer, py_formatter).rstrip("\n"))
+        else:
+            highlighted_lines.append(highlight(line, PythonConsoleLexer(), formatter).rstrip("\n"))
+    highlighted = "\n".join(highlighted_lines)
     html = f'<div class="sourceCode"><pre class="sourceCode pycon"><code class="sourceCode pycon">{highlighted}</code></pre></div>'
     return pf.RawBlock(html, format="html")
 
