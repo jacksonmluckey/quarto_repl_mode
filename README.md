@@ -14,7 +14,7 @@ State (variables, imports, function definitions) is shared across all chunks in 
 
 Chunks without `#| repl-mode: true` render normally.
 
-Errors display inline without breaking the session?
+Errors display inline without breaking the session if `#| eval: False` is included to prevent the error from ending the Quarto render execution.
 
 The extension code is in [`_extensions/repl-mode/repl_filter.py`](_extensions/repl-mode/repl_filter.py).
 
