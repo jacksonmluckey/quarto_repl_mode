@@ -72,6 +72,15 @@ repl-highlight-style: monokai
 
 It will not automatically sync with the Quarto syntax highlighting theme.
 
+## Styling
+
+REPL-mode chunks use the `pycon` language class, while normal Python chunks use `python`. You can target them separately in CSS:
+
+```css
+pre.sourceCode.pycon { /* REPL mode */ }
+pre.sourceCode.python { /* normal code */ }
+```
+
 ## Tests
 
 The tests are in [`tests/test_repl_filter.py`](tests/test_repl_filter.py).
