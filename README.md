@@ -2,6 +2,8 @@
 
 A Quarto filter that renders Python code chunks as an interactive REPL session.
 
+An [example Quarto document](examples/example.qmd) is rendered [here](examples/example.html).
+
 New lines begin with `>>>` prompts and `...` multi-line continuations.
 
 Expression results are rendered as inline output immeditately following the line they come from. The inline output is syntax highlighted. `print()` output is plain text.

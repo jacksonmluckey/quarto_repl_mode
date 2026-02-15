@@ -1,6 +1,7 @@
 ---
 title: "REPL Mode Example"
 format: html
+embed-resources: true
 ---
 
 The following chunk uses `#| repl-mode: true` to render as an interactive Python session:
