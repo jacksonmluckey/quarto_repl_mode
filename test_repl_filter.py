@@ -196,6 +196,28 @@ class TestHighlighting:
         # Should be the default text color
         assert output_style["color"] == "f8f8f2"
 
+    def test_continuation_lines_are_highlighted(self):
+        """Continuation lines (... prefix) should get syntax highlighting, not plain text."""
+        from pygments import highlight
+        from pygments.formatters import HtmlFormatter
+        from pygments.lexers import PythonConsoleLexer
+
+        session = REPLSession()
+        result = session.execute("if True:\n    x = 1\nelse:\n    x = 2")
+        # Highlight as a block (the way handle_cell does it)
+        console_lines = [l for l in result.split("\n") if not l.startswith(S)]
+        block = "\n".join(console_lines)
+        formatter = HtmlFormatter(nowrap=True, noclasses=True, style="monokai")
+        html = highlight(block, PythonConsoleLexer(), formatter)
+        # The "else" continuation line should have keyword highlighting,
+        # not be a single default-color span
+        for line in html.split("\n"):
+            if "..." in line and "else" in line:
+                assert line.count("<span") > 1, f"Continuation line lacks highlighting: {line}"
+                break
+        else:
+            raise AssertionError("Could not find '... else' continuation line in output")
+
     def test_make_repl_style_preserves_other_tokens(self):
         from pygments.styles import get_style_by_name
 

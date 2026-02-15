@@ -1,0 +1,15 @@
+/.quarto/
+**/*.quarto_ipynb
+
+.claude/
+
+.pytest_cache/
+
+.quarto/
+
+.venv/
+
+example_files/
+example.html
+
+**.pyc

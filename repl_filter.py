@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 """Quarto Python filter that renders REPL-mode code chunks as interactive Python sessions."""
 
 import code
@@ -226,16 +225,30 @@ def handle_cell(elem, doc):
     py_formatter = HtmlFormatter(nowrap=True, noclasses=True, style=pygments_style)
     py_lexer = Python3Lexer()
 
-    # Highlight each line: repr output gets Python syntax highlighting,
-    # everything else goes through PythonConsoleLexer.
-    highlighted_lines = []
-    for line in result.split("\n"):
+    # Highlight contiguous console lines (>>> and ...) as a block so
+    # PythonConsoleLexer can properly parse continuation lines.
+    # Repr output lines get individual Python syntax highlighting.
+    console_lexer = PythonConsoleLexer()
+    lines = result.split("\n")
+    highlighted_parts = []
+    console_buf = []
+
+    def flush_console():
+        if console_buf:
+            block = "\n".join(console_buf)
+            highlighted_parts.append(highlight(block, console_lexer, formatter).rstrip("\n"))
+            console_buf.clear()
+
+    for line in lines:
         if line.startswith(REPR_SENTINEL):
+            flush_console()
             repr_text = line[len(REPR_SENTINEL):]
-            highlighted_lines.append(highlight(repr_text, py_lexer, py_formatter).rstrip("\n"))
+            highlighted_parts.append(highlight(repr_text, py_lexer, py_formatter).rstrip("\n"))
         else:
-            highlighted_lines.append(highlight(line, PythonConsoleLexer(), formatter).rstrip("\n"))
-    highlighted = "\n".join(highlighted_lines)
+            console_buf.append(line)
+
+    flush_console()
+    highlighted = "\n".join(highlighted_parts)
     html = f'<div class="sourceCode"><pre class="sourceCode pycon"><code class="sourceCode pycon">{highlighted}</code></pre></div>'
     return pf.RawBlock(html, format="html")
 
