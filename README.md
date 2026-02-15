@@ -52,7 +52,7 @@ quarto add jacksonmluckey/quarto_repl_mode
 Install Python dependencies:
 
 ```bash
-uv add install panflute pygments
+uv add panflute pygments
 ```
 
 ## Setup
